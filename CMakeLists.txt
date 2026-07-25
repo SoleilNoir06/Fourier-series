@@ -10,12 +10,20 @@ project(FourierEpicycles)
 add_executable(${PROJECT_NAME} 
     src/main.cpp
     src/Epicycle.cpp
+    vendor/imgui/imgui.cpp
+    vendor/imgui/imgui_draw.cpp
+    vendor/imgui/imgui_tables.cpp
+    vendor/imgui/imgui_widgets.cpp
+    vendor/imgui/imgui_demo.cpp 
+    vendor/rlImGui/rlImGui.cpp
 )
 
 # 2. On indique où trouver les fichiers d'en-tête (tes .hpp et le raylib.h)
 target_include_directories(${PROJECT_NAME} PRIVATE 
-    include 
+    include
     vendor/raylib/include
+    vendor/imgui
+    vendor/rlImGui
 )
 
 # 3. On indique où trouver le code pré-compilé (le dossier qui contient les .lib ou .a)
