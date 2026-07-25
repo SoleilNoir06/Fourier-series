@@ -29,4 +29,6 @@ public:
 
     /// @brief Draw circle and vector
     void Draw();
+
+    void SetCenter(Vector2 newCenter);
 };

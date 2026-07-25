@@ -42,3 +42,8 @@ void Epicycle::Draw()
     // Draw small circle at the tip
     DrawCircleV(tip, 3.0f, BLUE);
 }
+
+void Epicycle::SetCenter(Vector2 newCenter)
+{
+    _center = newCenter;
+}
