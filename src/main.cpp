@@ -8,38 +8,32 @@
 int main()
 {
     // Window size
-    const int SCREENWIDTH = 1960;
-    const int SCREENHEIGHT = 1080;
+    
+    const int SCREENWIDTH = 1600;
+    const int SCREENHEIGHT = 900;
     const int GUIWIDTH = 500;
 
     // Init window
     InitWindow(SCREENWIDTH, SCREENHEIGHT, "Fourier series - Epicycles");
 
-    // // Init rlImGui
-    // ImGui::CreateContext();
-
-    // ImGuiIO &io = ImGui::GetIO();
-
-    // const char *fontPath = "../assets/fonts/RobotoSlab-Black.ttf";
-
-    // if (FileExists(fontPath))
-    // {
-    //     io.Fonts->AddFontFromFileTTF(fontPath, 18.0f);
-
-    //     unsigned char *pixels = nullptr;
-    //     int width, height;
-    //     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-    // }
-    // else
-    // {
-    //     io.Fonts->AddFontDefault();
-    //     TraceLog(LOG_ERROR, "IMPOSSIBLE DE TROUVER LA POLICE AU CHEMIN INDIQUE !");
-    // }
-
+    // Init rlImGui
     rlImGuiSetup(true);
+
+    // Load font
+    ImGuiIO &io = ImGui::GetIO();
+    const char *fontPath = "../../assets/fonts/RobotoSlab-Black.ttf";
+
+    if (FileExists(fontPath))
+        io.FontDefault = io.Fonts->AddFontFromFileTTF(fontPath, 18.0f);
+    else    
+        TraceLog(LOG_ERROR, "IMPOSSIBLE DE TROUVER LA POLICE AU CHEMIN INDIQUE !");
 
     // Vars
     Vector2 center = {(SCREENWIDTH + GUIWIDTH) / 2, SCREENHEIGHT / 2};
+
+    //Drop down menu variables
+    const char *options[] =  {"Option 1", "Option 2", "Option 3"}; 
+    int selectedOption = 0;
 
     // Path and epicycles
     std::vector<Vector2> path;
@@ -50,7 +44,7 @@ int main()
 
     for (int i = 0; i < circlesNumber; i++)
     {
-        int n = i * 2 + 1;
+        int n = cos(i)*sin(i) >= 0 ? 2 * i + 1 : -(2 * i + 1);
 
         float radius = 200.0f * (4.0f / (PI * n));
 
@@ -87,7 +81,21 @@ int main()
         ImGui::SetNextWindowSize(ImVec2(GUIWIDTH, SCREENHEIGHT));
 
         ImGui::Begin("Presets", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-        ImGui::Text("Hello, World !");
+
+        // Drop down menu
+        if (ImGui::BeginCombo("Options", options[selectedOption]))
+        {
+            for (int i = 0; i < IM_ARRAYSIZE(options); i++)
+            {
+                bool isSelected = (selectedOption == i);
+                if (ImGui::Selectable(options[i], isSelected))
+                    selectedOption = i;
+
+                if (isSelected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
         ImGui::End();
 
         // Draw circles
