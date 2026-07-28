@@ -18,6 +18,8 @@ void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 ce
     // Init window
     InitWindow(SCREENWIDTH, SCREENHEIGHT, "Fourier series - Epicycles");
 
+    SetTargetFPS(60);
+
     // Init rlImGui
     rlImGuiSetup(true);
 
@@ -34,7 +36,7 @@ void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 ce
     Vector2 center = {(SCREENWIDTH + GUIWIDTH) / 2, SCREENHEIGHT / 2};
 
     //Drop down menu variables
-    const char *options[] =  {"Square", "Sawtooth", "5 branches star", "Perfect heart"}; 
+    const char *options[] =  {"Square", "Triangle", "5 branches star", "Perfect heart"}; 
     int selectedOption = 0;
     int previousSelectedOption = -1;
 
@@ -127,36 +129,43 @@ void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 ce
     switch (selectedOption)
     {
     case 0: //Square
-        circlesNumber = 100;
+        circlesNumber = 200;
 
         for (int i = 0; i < circlesNumber; i++)
         {
-            n = n = (2 * i + 1) * (i % 2 == 0 ? 1 : -1);
+            int k = i / 2;
 
-            radius = 250.0f / (n * n);
+            n = (i % 2 == 0) ? (4 * k + 1) : -(4 * k + 3);
 
-            speed = 1.0f * n;
+            float fn = (float)n;
+            radius = 400.0f / (fn * fn);
+
+            speed = 1.0f * fn;
 
             epicycles.push_back(Epicycle(center, radius, PI/4.0f, speed));
         }
         break;
-    case 1: //Sawtooth
-        circlesNumber = 30;
+    case 1: // Triangle
+        circlesNumber = 100;
 
         for (int i = 0; i < circlesNumber; i++)
         {
-            n = i + 1;
+            int k = i / 2;
 
-            radius = (100.0f / n) * (i % 2 == 0 ? 1 : -1);
+            n = (i % 2 == 0) ? (3 * k + 1) : -(3 * k + 2);
 
-            speed = 1.0f * n;
+            float fn = (float)n;
 
-            epicycles.push_back(Epicycle(center, radius, 0, speed));
+            radius = 250.0f / (fn * fn);
+
+            speed = 1.0f * fn;
+
+            epicycles.push_back(Epicycle(center, radius, PI/4.0f, speed));
         }
         break;
     case 2: //5 branches star
         epicycles.push_back(Epicycle(center, 250.0f, 0, 1.0f));
-        epicycles.push_back(Epicycle(center, 175.0f, 0, -4.0f));
+        epicycles.push_back(Epicycle(center, 175.0f, 0, -6.0f));
         break;
     case 3: //Perfect heart
         epicycles.push_back(Epicycle(center, 250.0f, -PI / 2.0f, 1.0f));
