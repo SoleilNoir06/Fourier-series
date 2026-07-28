@@ -24,7 +24,7 @@ int main()
     const char *fontPath = "../../assets/fonts/RobotoSlab-Black.ttf";
 
     if (FileExists(fontPath))
-        io.FontDefault = io.Fonts->AddFontFromFileTTF(fontPath, 18.0f);
+        io.FontDefault = io.Fonts->AddFontFromFileTTF(fontPath, 25.0f);
     else    
         TraceLog(LOG_ERROR, "IMPOSSIBLE DE TROUVER LA POLICE AU CHEMIN INDIQUE !");
 
@@ -34,27 +34,71 @@ int main()
     //Drop down menu variables
     const char *options[] =  {"Option 1", "Option 2", "Option 3"}; 
     int selectedOption = 0;
+    int previousSelectedOption = -1;
 
     // Path and epicycles
     std::vector<Vector2> path;
     std::vector<Epicycle> epicycles;
 
-    // Fill epicycles vector
-    int circlesNumber = 5;
-
-    for (int i = 0; i < circlesNumber; i++)
-    {
-        int n = cos(i)*sin(i) >= 0 ? 2 * i + 1 : -(2 * i + 1);
-
-        float radius = 200.0f * (4.0f / (PI * n));
-
-        float speed = 1.0f * n;
-
-        epicycles.push_back(Epicycle(center, radius, 0, speed));
-    }
+    int circlesNumber = 0;
 
     while (!WindowShouldClose())
     {
+        // Test if the selected option has changed
+        if (selectedOption != previousSelectedOption)
+        {
+            previousSelectedOption = selectedOption;
+            epicycles.clear();
+            path.clear();
+
+            // Change preset based on the selected option
+            switch (selectedOption)
+            {
+            case 0:
+                circlesNumber = 5;
+
+                for (int i = 0; i < circlesNumber; i++)
+                {
+                    int n = cos(i) * sin(i) >= 0 ? 2 * i + 1 : -(2 * i + 1);
+
+                    float radius = 200.0f * (4.0f / (PI * n));
+
+                    float speed = 1.0f * n;
+
+                    epicycles.push_back(Epicycle(center, radius, 0, speed));
+                }
+                break;
+            case 1:
+                circlesNumber = 10;
+
+                for (int i = 0; i < circlesNumber; i++)
+                {
+                    int n = cos(i) * sin(i) >= 0 ? 2 * i + 1 : -(2 * i + 1);
+
+                    float radius = 200.0f * (4.0f / (PI * n));
+
+                    float speed = 1.0f * n;
+
+                    epicycles.push_back(Epicycle(center, radius, 0, speed));
+                }
+                break;
+            case 2:
+                circlesNumber = 20;
+
+                for (int i = 0; i < circlesNumber; i++)
+                {
+                    int n = cos(i) * sin(i) >= 0 ? 2 * i + 1 : -(2 * i + 1);
+
+                    float radius = 200.0f * (4.0f / (PI * n));
+
+                    float speed = 1.0f * n;
+
+                    epicycles.push_back(Epicycle(center, radius, 0, speed));
+                }
+                break;
+            }
+        }
+
         // Update everything in time
         float deltaTime = GetFrameTime();
         for (int i = 0; i < epicycles.size(); i++)
