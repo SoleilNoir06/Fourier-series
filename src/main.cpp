@@ -5,10 +5,12 @@
 #include "rlImGui.h"
 #include "Epicycle.hpp"
 
-int main()
+//Load functions
+void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 center);
+
+    int main()
 {
     // Window size
-    
     const int SCREENWIDTH = 1600;
     const int SCREENHEIGHT = 900;
     const int GUIWIDTH = 500;
@@ -32,7 +34,7 @@ int main()
     Vector2 center = {(SCREENWIDTH + GUIWIDTH) / 2, SCREENHEIGHT / 2};
 
     //Drop down menu variables
-    const char *options[] =  {"Option 1", "Option 2", "Option 3"}; 
+    const char *options[] =  {"Square", "Sawtooth", "5 branches star", "Perfect heart"}; 
     int selectedOption = 0;
     int previousSelectedOption = -1;
 
@@ -52,51 +54,7 @@ int main()
             path.clear();
 
             // Change preset based on the selected option
-            switch (selectedOption)
-            {
-            case 0:
-                circlesNumber = 5;
-
-                for (int i = 0; i < circlesNumber; i++)
-                {
-                    int n = cos(i) * sin(i) >= 0 ? 2 * i + 1 : -(2 * i + 1);
-
-                    float radius = 200.0f * (4.0f / (PI * n));
-
-                    float speed = 1.0f * n;
-
-                    epicycles.push_back(Epicycle(center, radius, 0, speed));
-                }
-                break;
-            case 1:
-                circlesNumber = 10;
-
-                for (int i = 0; i < circlesNumber; i++)
-                {
-                    int n = cos(i) * sin(i) >= 0 ? 2 * i + 1 : -(2 * i + 1);
-
-                    float radius = 200.0f * (4.0f / (PI * n));
-
-                    float speed = 1.0f * n;
-
-                    epicycles.push_back(Epicycle(center, radius, 0, speed));
-                }
-                break;
-            case 2:
-                circlesNumber = 20;
-
-                for (int i = 0; i < circlesNumber; i++)
-                {
-                    int n = cos(i) * sin(i) >= 0 ? 2 * i + 1 : -(2 * i + 1);
-
-                    float radius = 200.0f * (4.0f / (PI * n));
-
-                    float speed = 1.0f * n;
-
-                    epicycles.push_back(Epicycle(center, radius, 0, speed));
-                }
-                break;
-            }
+            LoadPreset(epicycles, selectedOption, center);
         }
 
         // Update everything in time
@@ -159,4 +117,56 @@ int main()
     rlImGuiShutdown();
     CloseWindow();
     return 0;
+}
+
+void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 center)
+{
+    int circlesNumber, n = 0;
+    float radius, speed = 0.0f;
+
+    switch (selectedOption)
+    {
+    case 0: //Square
+        circlesNumber = 100;
+
+        for (int i = 0; i < circlesNumber; i++)
+        {
+            n = n = (2 * i + 1) * (i % 2 == 0 ? 1 : -1);
+
+            radius = 250.0f / (n * n);
+
+            speed = 1.0f * n;
+
+            epicycles.push_back(Epicycle(center, radius, PI/4.0f, speed));
+        }
+        break;
+    case 1: //Sawtooth
+        circlesNumber = 30;
+
+        for (int i = 0; i < circlesNumber; i++)
+        {
+            n = i + 1;
+
+            radius = (100.0f / n) * (i % 2 == 0 ? 1 : -1);
+
+            speed = 1.0f * n;
+
+            epicycles.push_back(Epicycle(center, radius, 0, speed));
+        }
+        break;
+    case 2: //5 branches star
+        epicycles.push_back(Epicycle(center, 250.0f, 0, 1.0f));
+        epicycles.push_back(Epicycle(center, 175.0f, 0, -4.0f));
+        break;
+    case 3: //Perfect heart
+        epicycles.push_back(Epicycle(center, 250.0f, -PI / 2.0f, 1.0f));
+        epicycles.push_back(Epicycle(center, 10.0f, -PI / 2.0f, -1.0f));
+        epicycles.push_back(Epicycle(center, 50.0f, PI / 2.0f, 2.0f));
+        epicycles.push_back(Epicycle(center, 50.0f, PI / 2.0f, -2.0f));
+        epicycles.push_back(Epicycle(center, 60.0f, PI / 2.0f, 3.0f));
+        epicycles.push_back(Epicycle(center, 20.0f, -PI / 2.0f, -3.0f));
+        epicycles.push_back(Epicycle(center, 10.0f, PI / 2.0f, 4.0f));
+        epicycles.push_back(Epicycle(center, 10.0f, PI / 2.0f, -4.0f));
+        break;
+    }
 }
