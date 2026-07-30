@@ -10,6 +10,7 @@ project(FourierEpicycles)
 add_executable(${PROJECT_NAME} 
     src/main.cpp
     src/Epicycle.cpp
+    src/MathParser.cpp
     vendor/imgui/imgui.cpp
     vendor/imgui/imgui_draw.cpp
     vendor/imgui/imgui_tables.cpp
@@ -25,6 +26,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     vendor/imgui
     vendor/rlImGui
 )
+
+target_compile_options(${PROJECT_NAME} PRIVATE /bigobj)
 
 # 3. On indique où trouver le code pré-compilé (le dossier qui contient les .lib ou .a)
 target_link_directories(${PROJECT_NAME} PRIVATE 

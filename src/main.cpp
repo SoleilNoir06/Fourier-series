@@ -5,10 +5,10 @@
 #include "rlImGui.h"
 #include "Epicycle.hpp"
 
-//Load functions
+// Load functions
 void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 center);
 
-    int main()
+int main()
 {
     // Window size
     const int SCREENWIDTH = 1600;
@@ -29,14 +29,14 @@ void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 ce
 
     if (FileExists(fontPath))
         io.FontDefault = io.Fonts->AddFontFromFileTTF(fontPath, 25.0f);
-    else    
+    else
         TraceLog(LOG_ERROR, "IMPOSSIBLE DE TROUVER LA POLICE AU CHEMIN INDIQUE !");
 
     // Vars
     Vector2 center = {(SCREENWIDTH + GUIWIDTH) / 2, SCREENHEIGHT / 2};
 
-    //Drop down menu variables
-    const char *options[] =  {"Square", "Triangle", "5 branches star", "Perfect heart"}; 
+    // Drop down menu variables
+    const char *options[] = {"Square", "Triangle", "7 branches star", "Perfect heart"};
     int selectedOption = 0;
     int previousSelectedOption = -1;
 
@@ -44,7 +44,12 @@ void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 ce
     std::vector<Vector2> path;
     std::vector<Epicycle> epicycles;
 
+    // Number of epicycles
     int circlesNumber = 0;
+
+    // Input formulas
+    char formulaX[256] = "cos(t)";
+    char formulaY[256] = "sin(t)";
 
     while (!WindowShouldClose())
     {
@@ -100,6 +105,23 @@ void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 ce
             }
             ImGui::EndCombo();
         }
+
+        // User expression input
+        ImGui::Text("Enter you time formulas :");
+
+        // X axis
+        ImGui::InputText("x(t)", formulaX, sizeof(formulaX));
+
+        // Y axis
+        ImGui::InputText("y(t)", formulaY, sizeof(formulaY));
+
+        // Generate epicycles
+        if (ImGui::Button("Generate epicycles"))
+        {
+            TraceLog(LOG_INFO, "X formula ready : %s", formulaX);
+            TraceLog(LOG_INFO, "Y formula ready : %s", formulaY);
+        }
+
         ImGui::End();
 
         // Draw circles
@@ -128,7 +150,7 @@ void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 ce
 
     switch (selectedOption)
     {
-    case 0: //Square
+    case 0: // Square
         circlesNumber = 200;
 
         for (int i = 0; i < circlesNumber; i++)
@@ -142,7 +164,7 @@ void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 ce
 
             speed = 1.0f * fn;
 
-            epicycles.push_back(Epicycle(center, radius, PI/4.0f, speed));
+            epicycles.push_back(Epicycle(center, radius, PI / 4.0f, speed));
         }
         break;
     case 1: // Triangle
@@ -160,14 +182,14 @@ void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 ce
 
             speed = 1.0f * fn;
 
-            epicycles.push_back(Epicycle(center, radius, PI/4.0f, speed));
+            epicycles.push_back(Epicycle(center, radius, PI / 4.0f, speed));
         }
         break;
-    case 2: //5 branches star
+    case 2: // 7 branches star
         epicycles.push_back(Epicycle(center, 250.0f, 0, 1.0f));
         epicycles.push_back(Epicycle(center, 175.0f, 0, -6.0f));
         break;
-    case 3: //Perfect heart
+    case 3: // Perfect heart
         epicycles.push_back(Epicycle(center, 250.0f, -PI / 2.0f, 1.0f));
         epicycles.push_back(Epicycle(center, 10.0f, -PI / 2.0f, -1.0f));
         epicycles.push_back(Epicycle(center, 50.0f, PI / 2.0f, 2.0f));
