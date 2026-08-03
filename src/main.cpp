@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "rlImGui.h"
 #include "Epicycle.hpp"
+#include "MathParser.hpp"
 
 // Load functions
 void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 center);
@@ -118,8 +119,25 @@ int main()
         // Generate epicycles
         if (ImGui::Button("Generate epicycles"))
         {
-            TraceLog(LOG_INFO, "X formula ready : %s", formulaX);
-            TraceLog(LOG_INFO, "Y formula ready : %s", formulaY);
+            epicycles.clear();
+            path.clear();
+
+            // Get 2D points from user formulas
+            std::vector<Point2D> points = GeneratePathFromFormulas(formulaX, formulaY, 1000);
+
+            // Compute DFT
+            if (!points.empty())
+            {
+                std::vector<EpicycleData> dftData = ComputeDFT(points);
+
+                // On convertit les données neutres en vrais objets Epicycle !
+                for (size_t i = 0; i < dftData.size(); i++)
+                {
+                    epicycles.push_back(Epicycle(center, dftData[i].radius, dftData[i].angle, dftData[i].speed));
+                }
+
+                path.clear();
+            }
         }
 
         ImGui::End();

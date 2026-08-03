@@ -31,4 +31,6 @@ public:
     void Draw();
 
     void SetCenter(Vector2 newCenter);
+
+    float GetRadius() const;
 };
