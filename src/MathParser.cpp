@@ -10,7 +10,6 @@ std::vector<Point2D> GeneratePathFromFormulas(const std::string &formulaX, const
 {
     std::vector<Point2D> path;
     double t_var = 0.0;
-    float zoom = 250.0f; // Adjust the zoom factor as needed
 
     exprtk::symbol_table<double> symbolTable;
     symbolTable.add_variable("t", t_var);
@@ -101,7 +100,14 @@ std::vector<EpicycleData> ComputeDFT(const std::vector<Point2D> &points)
 
         float radius = std::sqrt(re * re + im * im) / (float)N;
         float angle = std::atan2(im, re);
-        float speed = (float)k;
+
+        // Adjusting frequency
+        int freq = k;
+        if (k > N / 2)
+        {
+            freq = k - N;
+        }
+        float speed = (float)freq;
 
         results.push_back({radius, angle, speed});
     }
