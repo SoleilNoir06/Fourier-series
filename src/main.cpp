@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <cmath>
 #include <vector>
+#include <cstring>
 #include "imgui.h"
 #include "rlImGui.h"
 #include "Epicycle.hpp"
@@ -37,7 +38,7 @@ int main()
     Vector2 center = {(SCREENWIDTH + GUIWIDTH) / 2, SCREENHEIGHT / 2};
 
     // Drop down menu variables
-    const char *options[] = {"Square", "Triangle", "7 branches star", "Perfect heart"};
+    const char *options[] = {"Perfect circle", "Heart", "Star", "Lissajous curve"};
     int selectedOption = 0;
     int previousSelectedOption = -1;
 
@@ -58,11 +59,49 @@ int main()
         if (selectedOption != previousSelectedOption)
         {
             previousSelectedOption = selectedOption;
+
+            // Update input field with the selected preset formulas
+            switch (selectedOption)
+            {
+            case 0: // Circle
+                strncpy(formulaX, "cos(t)", sizeof(formulaX));
+                strncpy(formulaY, "sin(t)", sizeof(formulaY));
+                break;
+            case 1: // Heart
+                strncpy(formulaX, "16 * sin(t)^3", sizeof(formulaX));
+                strncpy(formulaY, "-(13 * cos(t) - 5 * cos(2*t) - 2 * cos(3*t) - cos(4*t))", sizeof(formulaY));
+                break;
+            case 2: // Star
+                strncpy(formulaX, "cos(t) + 0.5 * cos(-4*t)", sizeof(formulaX));
+                strncpy(formulaY, "sin(t) + 0.5 * sin(-4*t)", sizeof(formulaY));
+                break;
+            case 3: // Lissajous
+                strncpy(formulaX, "sin(3*t)", sizeof(formulaX));
+                strncpy(formulaY, "sin(2*t)", sizeof(formulaY));
+                break;
+            }
+
+            // Security: Ensure null-termination of the strings
+            formulaX[sizeof(formulaX) - 1] = '\0';
+            formulaY[sizeof(formulaY) - 1] = '\0';
+
+            // Automatically generate epicycles based on the selected preset formulas
             epicycles.clear();
             path.clear();
 
-            // Change preset based on the selected option
-            LoadPreset(epicycles, selectedOption, center);
+            std::vector<Point2D> points = GeneratePathFromFormulas(formulaX, formulaY, 250);
+
+            if (!points.empty())
+            {
+                std::vector<EpicycleData> dftData = ComputeDFT(points);
+                for (size_t i = 0; i < dftData.size(); i++)
+                {
+                    if(epicycles.size() > 250)
+                        epicycles.erase(epicycles.begin());
+                        
+                    epicycles.push_back(Epicycle(center, dftData[i].radius, dftData[i].angle, dftData[i].speed));
+                }
+            }
         }
 
         // Update everything in time
@@ -159,63 +198,4 @@ int main()
     rlImGuiShutdown();
     CloseWindow();
     return 0;
-}
-
-void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 center)
-{
-    int circlesNumber, n = 0;
-    float radius, speed = 0.0f;
-
-    switch (selectedOption)
-    {
-    case 0: // Square
-        circlesNumber = 200;
-
-        for (int i = 0; i < circlesNumber; i++)
-        {
-            int k = i / 2;
-
-            n = (i % 2 == 0) ? (4 * k + 1) : -(4 * k + 3);
-
-            float fn = (float)n;
-            radius = 400.0f / (fn * fn);
-
-            speed = 1.0f * fn;
-
-            epicycles.push_back(Epicycle(center, radius, PI / 4.0f, speed));
-        }
-        break;
-    case 1: // Triangle
-        circlesNumber = 100;
-
-        for (int i = 0; i < circlesNumber; i++)
-        {
-            int k = i / 2;
-
-            n = (i % 2 == 0) ? (3 * k + 1) : -(3 * k + 2);
-
-            float fn = (float)n;
-
-            radius = 250.0f / (fn * fn);
-
-            speed = 1.0f * fn;
-
-            epicycles.push_back(Epicycle(center, radius, PI / 4.0f, speed));
-        }
-        break;
-    case 2: // 7 branches star
-        epicycles.push_back(Epicycle(center, 250.0f, 0, 1.0f));
-        epicycles.push_back(Epicycle(center, 175.0f, 0, -6.0f));
-        break;
-    case 3: // Perfect heart
-        epicycles.push_back(Epicycle(center, 250.0f, -PI / 2.0f, 1.0f));
-        epicycles.push_back(Epicycle(center, 10.0f, -PI / 2.0f, -1.0f));
-        epicycles.push_back(Epicycle(center, 50.0f, PI / 2.0f, 2.0f));
-        epicycles.push_back(Epicycle(center, 50.0f, PI / 2.0f, -2.0f));
-        epicycles.push_back(Epicycle(center, 60.0f, PI / 2.0f, 3.0f));
-        epicycles.push_back(Epicycle(center, 20.0f, -PI / 2.0f, -3.0f));
-        epicycles.push_back(Epicycle(center, 10.0f, PI / 2.0f, 4.0f));
-        epicycles.push_back(Epicycle(center, 10.0f, PI / 2.0f, -4.0f));
-        break;
-    }
 }
