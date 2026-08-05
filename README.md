@@ -38,6 +38,8 @@ Make sure you have a C++ compiler and CMake installed on your machine.
     ```bash
     cmake --build .
 
+4. Launch executable generated (FourierEpicycles.exe on Windows)
+
 ## 👨‍💻 About
 
 Project developed as a personal exploration of C++ software architecture and applied mathematics, before starting a Bachelor's degree in Software Engineering at HE-Arc in Neuchâtel, Switzerland.
