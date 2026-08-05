@@ -10,6 +10,7 @@ std::vector<Point2D> GeneratePathFromFormulas(const std::string &formulaX, const
 {
     std::vector<Point2D> path;
     double t_var = 0.0;
+    float zoom = 250.0f; // Adjust the zoom factor as needed
 
     exprtk::symbol_table<double> symbolTable;
     symbolTable.add_variable("t", t_var);
@@ -37,6 +38,45 @@ std::vector<Point2D> GeneratePathFromFormulas(const std::string &formulaX, const
     else
     {
         std::cerr << "Invalid syntax in formula" << std::endl;
+    }
+
+    //Automatically scale the path
+    if (!path.empty())
+    {
+        // Searching for the limits of the drawing
+        float minX = path[0].x;
+        float maxX = path[0].x;
+        float minY = path[0].y;
+        float maxY = path[0].y;
+
+        for (size_t i = 0; i < path.size(); i++)
+        {
+            if (path[i].x < minX)
+                minX = path[i].x;
+            if (path[i].x > maxX)
+                maxX = path[i].x;
+            if (path[i].y < minY)
+                minY = path[i].y;
+            if (path[i].y > maxY)
+                maxY = path[i].y;
+        }
+
+        // Computing biggest dimension (width and height)
+        float width = std::abs(maxX - minX);
+        float height = std::abs(maxY - minY);
+        float maxAmplitude = std::max(width, height);
+
+        if (maxAmplitude > 0.001f){
+            float targetSize = 800.0f;
+            float autoZoom = targetSize / maxAmplitude;
+
+            for (size_t i = 0; i < path.size(); i++)
+            {
+                path[i].x *= autoZoom;
+                path[i].y *= autoZoom;
+            }
+        }
+
     }
 
     return path;
