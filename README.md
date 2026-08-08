@@ -21,24 +21,32 @@ An interactive Fourier series visualizer written in C++. This program lets you i
 
 ## 🚀 Installation & Compilation
 
-Make sure you have a C++ compiler and CMake installed on your machine.
+Don't want to compile it yourself? You can download the ready-to-use version:
+1. Go to the **Releases** section (on the right side of the GitHub page).
+2. Download the `FourierEpicycles.zip` file from the latest release.
+3. Extract the folder and run `FourierEpicycles.exe` directly.
 
-1. Clone this repository:
+## 🛠️ Building from source (For Developers)
+
+**⚠️ Important prerequisites:** To build this project, you must have a C++ compiler installed (such as MSVC on Windows) as well as **[CMake](https://cmake.org/download/)**.
+
+1. Clone this repository :
    ```bash
    git clone https://github.com/SoleilNoir06/fourier-series.git
    cd fourier-series
+   ```
 
-2. Create a build directory and configure the project
-    ```bash
-    mkdir build
-    cd build
-    cmake ..
+2. Create a build directory and configure the project :
+   ```bash
+   mkdir build
+   cd build
+   cmake ..
+   ```
 
-3. Build the project
-    ```bash
-    cmake --build .
-
-4. Launch executable generated (FourierEpicycles.exe on Windows)
+3. Build the project (in Release mode for better performance) :
+   ```bash
+   cmake --build . --config Release
+   ```
 
 ## 👨‍💻 About
 

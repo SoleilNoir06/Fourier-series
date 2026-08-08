@@ -27,7 +27,7 @@ int main()
 
     // Load font
     ImGuiIO &io = ImGui::GetIO();
-    const char *fontPath = "../../assets/fonts/RobotoSlab-Black.ttf";
+    const char *fontPath = "assets/fonts/RobotoSlab-Black.ttf";
 
     if (FileExists(fontPath))
         io.FontDefault = io.Fonts->AddFontFromFileTTF(fontPath, 25.0f);
@@ -96,9 +96,9 @@ int main()
                 std::vector<EpicycleData> dftData = ComputeDFT(points);
                 for (size_t i = 0; i < dftData.size(); i++)
                 {
-                    if(epicycles.size() > 250)
+                    if (epicycles.size() > 250)
                         epicycles.erase(epicycles.begin());
-                        
+
                     epicycles.push_back(Epicycle(center, dftData[i].radius, dftData[i].angle, dftData[i].speed));
                 }
             }
