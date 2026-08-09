@@ -1,3 +1,5 @@
+#define NANOSVG_IMPLEMENTATION
+#include "nanosvg.h"
 #include "MathParser.hpp"
 #include "exprtk.hpp"
 #include <cmath>
@@ -109,11 +111,73 @@ std::vector<EpicycleData> ComputeDFT(const std::vector<Point2D> &points)
         }
         float speed = (float)freq;
 
-        results.push_back({radius, angle, speed});
+        if (radius > 0.1f)
+            results.push_back({radius, angle, speed});
     }
 
     std::sort(results.begin(), results.end(), [](const EpicycleData &a, const EpicycleData &b)
               { return a.radius > b.radius; });
 
     return results;
+}
+
+std::vector<Point2D> GeneratePathFromSVG(const char *filename)
+{
+    std::vector<Point2D> path;
+
+    // NanoSVG reads the file
+    // 96.0f = DPI (standard resolution)
+    NSVGimage *image = nsvgParseFromFile(filename, "px", 96.0f);
+
+    if (image == nullptr)
+    {
+        std::cerr << "Impossible to open SVG file !" << std::endl;
+        return path;
+    }
+
+    // Going through every shape of image
+    for (NSVGshape *shape = image->shapes; shape != nullptr; shape = shape->next)
+    {
+        // Running trough every paths of the shape
+        for (NSVGpath *p = shape->paths; p != nullptr; p = p->next)
+        {
+            // Calculating every point
+            for (int i = 0; i < p->npts - 1; i += 3)
+            {
+                // Creating pointers tothe 4 control points of the curve
+                // X and Y in succession so multiplying index by 2
+                float *p0 = &p->pts[(i + 0) * 2]; // Starting point
+                float *p1 = &p->pts[(i + 1) * 2]; // Control point 1
+                float *p2 = &p->pts[(i + 2) * 2]; // Control point 2
+                float *p3 = &p->pts[(i + 3) * 2]; // Ending point
+
+                // Choosing how many points we want extract from this curve
+                int samplesPerCurve = 20;
+
+                // Loop to sample
+                for (int j = 0; j < samplesPerCurve; j++)
+                {
+                    // Calculating t cursor which goes from 0.0 to 1.0
+                    float t = (float)j / (float)samplesPerCurve;
+
+                    // Pre calculating powers
+                    float u = 1.0f - t;
+                    float uu = u * u;
+                    float uuu = uu * u;
+                    float tt = t * t;
+                    float ttt = tt * t;
+
+                    float pointX = uuu * p0[0] + 3 * t * uu * p1[0] + 3 * tt * u * p2[0] + ttt * p3[0];
+                    float pointY = uuu * p0[1] + 3 * t * uu * p1[1] + 3 * tt * u * p2[1] + ttt * p3[1];
+
+                    // Filling points vector
+                    path.push_back({pointX, pointY});
+                }
+            }
+        }
+    }
+
+    nsvgDelete(image);
+
+    return path;
 }

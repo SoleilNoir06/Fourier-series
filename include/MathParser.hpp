@@ -17,3 +17,4 @@ struct EpicycleData
 
 std::vector<Point2D> GeneratePathFromFormulas(const std::string &formulaX, const std::string &formulaY, int numSamples);
 std::vector<EpicycleData> ComputeDFT(const std::vector<Point2D> &points);
+std::vector<Point2D> GeneratePathFromSVG(const char *filename);
