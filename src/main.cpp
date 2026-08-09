@@ -27,7 +27,7 @@ int main()
 
     // Load font
     ImGuiIO &io = ImGui::GetIO();
-    const char *fontPath = "assets/fonts/RobotoSlab-Black.ttf";
+    const char *fontPath = "../../assets/fonts/RobotoSlab-Black.ttf";
 
     if (FileExists(fontPath))
         io.FontDefault = io.Fonts->AddFontFromFileTTF(fontPath, 25.0f);
@@ -38,7 +38,7 @@ int main()
     Vector2 center = {(SCREENWIDTH + GUIWIDTH) / 2, SCREENHEIGHT / 2};
 
     // Drop down menu variables
-    const char *options[] = {"Perfect circle", "Heart", "Star", "Lissajous curve"};
+    const char *options[] = {"Perfect circle", "Heart", "Star", "Lissajous curve", "Personnalized"};
     int selectedOption = 0;
     int previousSelectedOption = -1;
 
@@ -150,13 +150,20 @@ int main()
         ImGui::Text("Enter you time formulas :");
 
         // X axis
-        ImGui::InputText("x(t)", formulaX, sizeof(formulaX));
+        bool changedX = ImGui::InputText("x(t)", formulaX, sizeof(formulaX));
 
         // Y axis
-        ImGui::InputText("y(t)", formulaY, sizeof(formulaY));
+        bool changedY = ImGui::InputText("y(t)", formulaY, sizeof(formulaY));
+
+        // Check if input manually changed
+        if (changedX || changedY)
+        {
+            selectedOption = 4;
+            previousSelectedOption = 4;
+        }
 
         // Generate epicycles
-        if (ImGui::Button("Generate epicycles"))
+        if (ImGui::Button("Generate epicycles") || IsKeyPressed(KEY_ENTER))
         {
             epicycles.clear();
             path.clear();
@@ -177,6 +184,27 @@ int main()
 
                 path.clear();
             }
+        }
+
+        ImGui::Separator();
+
+        ImGui::Text("Active epicycles : %d", (int)epicycles.size());
+
+        ImGui::Separator();
+
+        if (ImGui::CollapsingHeader("Maths functions"))
+        {
+            ImGui::TextWrapped("Info : 't' is the time var");
+            ImGui::Spacing();
+            ImGui::BulletText("Base : +, -, *, /, ^ (power)");
+            ImGui::BulletText("Constants : pi, e");
+            ImGui::BulletText("Trigo : cos(t), sin(t), tan(t), acos(t), cosh(t), etc");
+            ImGui::BulletText("Calculus : exp(t), sqrt(t), abs(t)");
+            ImGui::BulletText("Logarithms : log(t), log10(t), log2(t), logn(t)");
+            ImGui::BulletText("Utilities : min(a, b), max(a, b), sign(t)");
+            ImGui::BulletText("Rounding : floor(t), ceil(t), round(t)");
+            ImGui::BulletText("Limits & Modulo : clamp(min, t, max), mod(t, n), \nfrac(t)");
+            ImGui::BulletText("Logic : if(condition, true, false)");
         }
 
         ImGui::End();

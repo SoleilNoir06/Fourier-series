@@ -39,7 +39,7 @@ std::vector<Point2D> GeneratePathFromFormulas(const std::string &formulaX, const
         std::cerr << "Invalid syntax in formula" << std::endl;
     }
 
-    //Automatically scale the path
+    // Automatically scale the path
     if (!path.empty())
     {
         // Searching for the limits of the drawing
@@ -65,7 +65,8 @@ std::vector<Point2D> GeneratePathFromFormulas(const std::string &formulaX, const
         float height = std::abs(maxY - minY);
         float maxAmplitude = std::max(width, height);
 
-        if (maxAmplitude > 0.001f){
+        if (maxAmplitude > 0.001f)
+        {
             float targetSize = 800.0f;
             float autoZoom = targetSize / maxAmplitude;
 
@@ -75,7 +76,6 @@ std::vector<Point2D> GeneratePathFromFormulas(const std::string &formulaX, const
                 path[i].y *= autoZoom;
             }
         }
-
     }
 
     return path;

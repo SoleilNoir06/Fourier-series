@@ -48,7 +48,6 @@ void Epicycle::SetCenter(Vector2 newCenter)
     _center = newCenter;
 }
 
-
 float Epicycle::GetRadius() const
 {
     return _radius;
