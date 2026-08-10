@@ -53,6 +53,9 @@ int main()
     char formulaX[256] = "cos(t)";
     char formulaY[256] = "sin(t)";
 
+    // File image path
+    char svgFilePath[512] = "";
+
     while (!WindowShouldClose())
     {
         // Test if the selected option has changed
@@ -118,6 +121,57 @@ int main()
 
         // Fill path points list
         path.push_back(epicycles.back().GetTipPosition());
+
+        // Drag and Drop management
+        if (IsFileDropped())
+        {
+            FilePathList droppedFiles = LoadDroppedFiles();
+
+            // Check if it's SVG
+            if (droppedFiles.count > 0 && IsFileExtension(droppedFiles.paths[0], ".svg"))
+            {
+
+                // Copying path in input text ImGui
+                strncpy_s(svgFilePath, droppedFiles.paths[0], sizeof(svgFilePath));
+                svgFilePath[sizeof(svgFilePath) - 1] = '\0';
+
+                // Generating DFT
+                epicycles.clear();
+                path.clear();
+
+                std::vector<Point2D> points = GeneratePathFromSVG(svgFilePath);
+
+                int maxPoints = 600;
+                if (points.size() > maxPoints)
+                {
+                    std::vector<Point2D> reducedPoints;
+                    float step = (float)points.size() / maxPoints;
+
+                    for (float i = 0; i < points.size(); i += step)
+                    {
+                        reducedPoints.push_back(points[(int)i]);
+
+                        if (reducedPoints.size() >= maxPoints)
+                            break;
+                    }
+                    points = reducedPoints;
+                }
+
+                if (!points.empty())
+                {
+                    std::vector<EpicycleData> dftData = ComputeDFT(points);
+                    for (size_t i = 0; i < dftData.size(); i++)
+                    {
+                        epicycles.push_back(Epicycle(center, dftData[i].radius, dftData[i].angle, dftData[i].speed));
+                    }
+                    formulaX[0] = '\0';
+                    formulaY[0] = '\0';
+                    selectedOption = 4;
+                    previousSelectedOption = 4;
+                }
+            }
+            UnloadDroppedFiles(droppedFiles);
+        }
 
         // Start of drawing
         BeginDrawing();
@@ -186,10 +240,41 @@ int main()
             }
         }
 
+        // Add a SVG file
+        ImGui::Separator();
+
+        ImGui::Text("External SVG file :");
+        ImGui::InputText("Path (.svg)", svgFilePath, sizeof(svgFilePath));
+
+        if (ImGui::Button("Load SVG"))
+        {
+            // Clear state
+            epicycles.clear();
+            path.clear();
+
+            std::vector<Point2D> points = GeneratePathFromSVG(svgFilePath);
+
+            if (!points.empty())
+            {
+                // Compute new DFT
+                std::vector<EpicycleData> dftData = ComputeDFT(points);
+
+                for (size_t i = 0; i < dftData.size(); i++)
+                    epicycles.push_back(Epicycle(center, dftData[i].radius, dftData[i].angle, dftData[i].speed));
+
+                formulaX[0] = '\0';
+                formulaY[0] = '\0';
+                selectedOption = 4;
+                previousSelectedOption = 4;
+            }
+        }
+
+        // Number of epicycles
         ImGui::Separator();
 
         ImGui::Text("Active epicycles : %d", (int)epicycles.size());
 
+        // Maths functions explanation
         ImGui::Separator();
 
         if (ImGui::CollapsingHeader("Maths functions"))

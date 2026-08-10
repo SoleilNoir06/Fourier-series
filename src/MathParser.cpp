@@ -151,7 +151,7 @@ std::vector<Point2D> GeneratePathFromSVG(const char *filename)
                 float *p2 = &p->pts[(i + 2) * 2]; // Control point 2
                 float *p3 = &p->pts[(i + 3) * 2]; // Ending point
 
-                // Choosing how many points we want extract from this curve
+                // Choosing how many points we want extract from this curves
                 int samplesPerCurve = 20;
 
                 // Loop to sample
