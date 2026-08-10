@@ -109,18 +109,21 @@ int main()
 
         // Update everything in time
         float deltaTime = GetFrameTime();
-        for (int i = 0; i < epicycles.size(); i++)
+        if (!epicycles.empty())
         {
-            if (i != 0)
-                epicycles[i].SetCenter(epicycles[i - 1].GetTipPosition());
-            else
-                epicycles[i].SetCenter(center);
+            for (int i = 0; i < epicycles.size(); i++)
+            {
+                if (i != 0)
+                    epicycles[i].SetCenter(epicycles[i - 1].GetTipPosition());
+                else
+                    epicycles[i].SetCenter(center);
 
-            epicycles[i].Update(deltaTime);
+                epicycles[i].Update(deltaTime);
+            }
+
+            // Fill path points list
+            path.push_back(epicycles.back().GetTipPosition());
         }
-
-        // Fill path points list
-        path.push_back(epicycles.back().GetTipPosition());
 
         // Drag and Drop management
         if (IsFileDropped())
@@ -159,11 +162,30 @@ int main()
 
                 if (!points.empty())
                 {
-                    std::vector<EpicycleData> dftData = ComputeDFT(points);
-                    for (size_t i = 0; i < dftData.size(); i++)
+                    // Recenter drawing
+                    float offsetX = 0.0f;
+                    float offsetY = 0.0f;
+
+                    for (const auto &p : points)
                     {
-                        epicycles.push_back(Epicycle(center, dftData[i].radius, dftData[i].angle, dftData[i].speed));
+                        offsetX += p.x;
+                        offsetY += p.y;
                     }
+
+                    offsetX /= points.size();
+                    offsetY /= points.size();
+
+                    for (auto &p : points)
+                    {
+                        p.x -= offsetX;
+                        p.y -= offsetY;
+                    }
+
+                    std::vector<EpicycleData> dftData = ComputeDFT(points);
+
+                    for (size_t i = 0; i < dftData.size(); i++)
+                        epicycles.push_back(Epicycle(center, dftData[i].radius, dftData[i].angle, dftData[i].speed));
+
                     formulaX[0] = '\0';
                     formulaY[0] = '\0';
                     selectedOption = 4;
@@ -254,8 +276,44 @@ int main()
 
             std::vector<Point2D> points = GeneratePathFromSVG(svgFilePath);
 
+            int maxPoints = 600;
+            if (points.size() > maxPoints)
+            {
+                std::vector<Point2D> reducedPoints;
+                float step = (float)points.size() / maxPoints;
+
+                for (float i = 0; i < points.size(); i += step)
+                {
+                    reducedPoints.push_back(points[(int)i]);
+
+                    if (reducedPoints.size() >= maxPoints)
+                        break;
+                }
+                points = reducedPoints;
+            }
+
             if (!points.empty())
             {
+                // Recenter drawing
+                float offsetX = 0.0f;
+                float offsetY = 0.0f;
+
+                for (const auto &p : points)
+                {
+                    offsetX += p.x;
+                    offsetY += p.y;
+                }
+
+                offsetX /= points.size();
+                offsetY /= points.size();
+
+                // 2. Décalage de tous les points pour les centrer
+                for (auto &p : points)
+                {
+                    p.x -= offsetX;
+                    p.y -= offsetY;
+                }
+
                 // Compute new DFT
                 std::vector<EpicycleData> dftData = ComputeDFT(points);
 
@@ -294,12 +352,15 @@ int main()
 
         ImGui::End();
 
-        // Draw circles
-        for (int i = 0; i < epicycles.size(); i++)
-            epicycles[i].Draw();
+        if (!epicycles.empty())
+        {
+            // Draw circles
+            for (int i = 0; i < epicycles.size(); i++)
+                epicycles[i].Draw();
 
-        // Draw path
-        DrawLineStrip(path.data(), (int)path.size(), DARKBLUE);
+            // Draw path
+            DrawLineStrip(path.data(), (int)path.size(), DARKBLUE);
+        }
 
         // End GUI drawing
         rlImGuiEnd();
