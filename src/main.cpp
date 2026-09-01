@@ -6,6 +6,7 @@
 #include "rlImGui.h"
 #include "Epicycle.hpp"
 #include "MathParser.hpp"
+#include "tinyfiledialogs.h"
 
 // Load functions
 void LoadPreset(std::vector<Epicycle> &epicycles, int selectedOption, Vector2 center);
@@ -268,62 +269,85 @@ int main()
         ImGui::Text("External SVG file :");
         ImGui::InputText("Path (.svg)", svgFilePath, sizeof(svgFilePath));
 
-        if (ImGui::Button("Load SVG"))
+        if (ImGui::Button("Browse SVG..."))
         {
-            // Clear state
-            epicycles.clear();
-            path.clear();
+            // 1. Prepare an array containing our filters (only .svg)
+            const char *filters[1] = {"*.svg"};
 
-            std::vector<Point2D> points = GeneratePathFromSVG(svgFilePath);
+            // 2. Call the tinyfiledialogs function
+            const char *chosenPath = tinyfd_openFileDialog(
+                "Open SVG File", // Window title
+                NULL,            // Default path
+                1,               // Number of filters
+                filters,         // Our array of filters
+                "SVG Files",     // Description displayed at the bottom right
+                0                // 0 = Multiple selection forbidden
+            );
 
-            int maxPoints = 600;
-            if (points.size() > maxPoints)
+            // 3. If the user successfully chose a file
+            if (chosenPath != NULL)
             {
-                std::vector<Point2D> reducedPoints;
-                float step = (float)points.size() / maxPoints;
+                // Update your ImGui text field cleanly
+                strncpy(svgFilePath, chosenPath, sizeof(svgFilePath));
+                svgFilePath[sizeof(svgFilePath) - 1] = '\0';
 
-                for (float i = 0; i < points.size(); i += step)
+                // Clear previous state
+                epicycles.clear();
+                path.clear();
+
+                // Generate points from the SVG
+                std::vector<Point2D> points = GeneratePathFromSVG(svgFilePath);
+
+                // --- Downsampling (Anti-freeze filter) ---
+                int maxPoints = 600;
+                if (points.size() > maxPoints)
                 {
-                    reducedPoints.push_back(points[(int)i]);
+                    std::vector<Point2D> reducedPoints;
+                    float step = (float)points.size() / maxPoints;
 
-                    if (reducedPoints.size() >= maxPoints)
-                        break;
-                }
-                points = reducedPoints;
-            }
+                    for (float i = 0; i < points.size(); i += step)
+                    {
+                        reducedPoints.push_back(points[(int)i]);
 
-            if (!points.empty())
-            {
-                // Recenter drawing
-                float offsetX = 0.0f;
-                float offsetY = 0.0f;
-
-                for (const auto &p : points)
-                {
-                    offsetX += p.x;
-                    offsetY += p.y;
-                }
-
-                offsetX /= points.size();
-                offsetY /= points.size();
-
-                // 2. Décalage de tous les points pour les centrer
-                for (auto &p : points)
-                {
-                    p.x -= offsetX;
-                    p.y -= offsetY;
+                        if (reducedPoints.size() >= maxPoints)
+                            break;
+                    }
+                    points = reducedPoints;
                 }
 
-                // Compute new DFT
-                std::vector<EpicycleData> dftData = ComputeDFT(points);
+                if (!points.empty())
+                {
+                    // --- Recenter drawing (Barycenter) ---
+                    float offsetX = 0.0f;
+                    float offsetY = 0.0f;
 
-                for (size_t i = 0; i < dftData.size(); i++)
-                    epicycles.push_back(Epicycle(center, dftData[i].radius, dftData[i].angle, dftData[i].speed));
+                    for (const auto &p : points)
+                    {
+                        offsetX += p.x;
+                        offsetY += p.y;
+                    }
 
-                formulaX[0] = '\0';
-                formulaY[0] = '\0';
-                selectedOption = 4;
-                previousSelectedOption = 4;
+                    offsetX /= points.size();
+                    offsetY /= points.size();
+
+                    for (auto &p : points)
+                    {
+                        p.x -= offsetX;
+                        p.y -= offsetY;
+                    }
+
+                    // --- Compute new DFT ---
+                    std::vector<EpicycleData> dftData = ComputeDFT(points);
+
+                    for (size_t i = 0; i < dftData.size(); i++)
+                        epicycles.push_back(Epicycle(center, dftData[i].radius, dftData[i].angle, dftData[i].speed));
+
+                    // Update UI
+                    formulaX[0] = '\0';
+                    formulaY[0] = '\0';
+                    selectedOption = 4;
+                    previousSelectedOption = 4;
+                }
             }
         }
 

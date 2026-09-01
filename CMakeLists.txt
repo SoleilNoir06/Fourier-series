@@ -11,6 +11,7 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     src/Epicycle.cpp
     src/MathParser.cpp
+    src/tinyfiledialogs.c
     vendor/imgui/imgui.cpp
     vendor/imgui/imgui_draw.cpp
     vendor/imgui/imgui_tables.cpp
