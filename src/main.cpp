@@ -38,6 +38,10 @@ int main()
     // Vars
     Vector2 center = {(SCREENWIDTH + GUIWIDTH) / 2, SCREENHEIGHT / 2};
 
+    // UI Vars
+    bool darkMode = true;
+    bool showCircles = true;
+
     // Drop down menu variables
     const char *options[] = {"Perfect circle", "Heart", "Star", "Lissajous curve", "Personnalized"};
     int selectedOption = 0;
@@ -198,7 +202,7 @@ int main()
 
         // Start of drawing
         BeginDrawing();
-        ClearBackground(LIGHTGRAY);
+        ClearBackground(darkMode ? BLACK : RAYWHITE);
 
         // Begin GUI drawing
         rlImGuiBegin();
@@ -356,6 +360,12 @@ int main()
 
         ImGui::Text("Active epicycles : %d", (int)epicycles.size());
 
+        // UI Settings
+        ImGui::Separator();
+
+        ImGui::Checkbox("Dark mode", &darkMode);
+        ImGui::Checkbox("Show circles", &showCircles);
+
         // Maths functions explanation
         ImGui::Separator();
 
@@ -380,10 +390,11 @@ int main()
         {
             // Draw circles
             for (int i = 0; i < epicycles.size(); i++)
-                epicycles[i].Draw();
+                epicycles[i].Draw(showCircles, darkMode);
 
             // Draw path
-            DrawLineStrip(path.data(), (int)path.size(), DARKBLUE);
+            Color pathColor = darkMode ? WHITE : DARKBLUE;
+            DrawLineStrip(path.data(), (int)path.size(), pathColor);
         }
 
         // End GUI drawing

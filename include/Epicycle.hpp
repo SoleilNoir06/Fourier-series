@@ -28,7 +28,7 @@ public:
     Vector2 GetTipPosition();
 
     /// @brief Draw circle and vector
-    void Draw();
+    void Draw(bool showCircles, bool darkMode);
 
     void SetCenter(Vector2 newCenter);
 

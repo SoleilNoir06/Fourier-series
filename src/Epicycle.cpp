@@ -28,19 +28,26 @@ Vector2 Epicycle::GetTipPosition()
 }
 
 /// @brief Draw circle and vector
-void Epicycle::Draw()
+void Epicycle::Draw(bool showCircles, bool darkMode)
 {
+    // Color according to current set mode
+    Color lineColor = darkMode ? WHITE : BLACK;
+    Color tipColor = darkMode ? WHITE : BLUE;
+
+    Color circleColor = darkMode ? Fade(WHITE, 0.2f) : Fade(RED, 0.3f);
+
     // Draw circle
-    DrawCircleLines(_center.x, _center.y, _radius, RED);
+    if (showCircles)
+        DrawCircleLines(_center.x, _center.y, _radius, circleColor);
 
     // Get tip position
     Vector2 tip = GetTipPosition();
 
     // Draw radius
-    DrawLineEx(_center, tip, 2.0f, BLACK);
+    DrawLineEx(_center, tip, 2.0f, lineColor);
 
     // Draw small circle at the tip
-    DrawCircleV(tip, 3.0f, BLUE);
+    DrawCircleV(tip, 3.0f, tipColor);
 }
 
 void Epicycle::SetCenter(Vector2 newCenter)
